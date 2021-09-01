@@ -1,11 +1,11 @@
 version: '3'
 services:
-  database:
-    container_name: db_container
+  dbase:
+    container_name: db_postgres
     image: postgres:latest
     restart: always
     ports:
-      - "5433:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -14,8 +14,8 @@ services:
       #      - ./server/db_data:/var/lib/postgresql/data
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  server:
-    container_name: server_container
+  serv:
+    container_name: serv_container
     depends_on:
       - database
     build:
@@ -27,5 +27,5 @@ services:
     #      dbHost: db_container
     #     host: server_container
     depends_on:
-      - database
+      - dbase
 

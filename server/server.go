@@ -4,15 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
-	pb "github.com/waere00/url-shorter-grpc/proto"
-	"google.golang.org/grpc"
 	"log"
 	"math/rand"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	_ "github.com/lib/pq"
+	pb "github.com/waere00/url-shorter-grpc/proto"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 	host       string = "localhost"
 	port       string = "9080"
 	dbHost     string = "localhost"
-	dbPort     string = "5433"
+	dbPort     string = "5434"
 	dbName     string = "links_db"
 	dbUser     string = "postgres"
 	dbPassword string = "postgres"

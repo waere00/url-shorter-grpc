@@ -1,6 +1,6 @@
 .PHONY: start-back
 start-back:
-	docker-compose up -d database
+	docker-compose up -d dbase
 	go run server/server.go
 
 .PHONY: start-client
