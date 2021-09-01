@@ -12,8 +12,8 @@ make stop          ## остановит сервер
 ```
 (from src dir)$ docker-compose up -d database
 (from src dir)$ cd server
-run go server.go
+go run server.go
 
 (from src dir)$ cd client
-run go client.go
+go run client.go
 ```
