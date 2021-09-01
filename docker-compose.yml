@@ -1,0 +1,31 @@
+version: '3'
+services:
+  database:
+    container_name: db_container
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: links_db
+    volumes:
+      #      - ./server/db_data:/var/lib/postgresql/data
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  server:
+    container_name: server_container
+    depends_on:
+      - database
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "9080:9080"
+    # environment:
+    #      dbHost: db_container
+    #     host: server_container
+    depends_on:
+      - database
+
