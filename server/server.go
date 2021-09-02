@@ -14,6 +14,8 @@ import (
 	_ "github.com/lib/pq"
 	pb "github.com/waere00/url-shorter-grpc/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -68,8 +70,6 @@ func main() {
 	}
 	defer db.Close()
 
-	db = GetDB()
-
 	// initializing Server
 	log.Println("Initializing Server")
 	srv := grpc.NewServer()
@@ -105,16 +105,19 @@ type ShorterServer struct {
 }
 
 func (s *ShorterServer) Create(ctx context.Context, req *pb.UrlRequest) (*pb.LinkResponse, error) {
+	if req.Url == "" {
+		return nil, status.Error(codes.InvalidArgument, "url cannot be empty")
+	}
 	response := new(pb.LinkResponse)
-	genLink := genShortLink()
 	db = GetDB()
-	//var checkLink string
-	//	db.QueryRow("SELECT link FROM links WHERE url = $1;", req.Url).Scan(&checkLink)
-	//	if checkLink != "" {
-	//		log.Println("Ссылка уже есть в базе")
-	//		response.Link = "localshorter.local/" + checkLink
-	//		return response, nil
-	//	}
+	var checkLink string
+	db.QueryRow("SELECT link FROM links WHERE url = $1;", req.Url).Scan(&checkLink)
+	if checkLink != "" {
+		log.Printf("Ссылка уже есть в базе: %s --> %s", req.Url, checkLink)
+		response.Link = "localshorter.local/" + checkLink
+		return response, nil
+	}
+	genLink := genShortLink()
 	log.Println(req.Url, genLink)
 	_, err := db.Exec("INSERT INTO links VALUES ($1, $2);", req.Url, genLink)
 	if err != nil {
@@ -126,39 +129,32 @@ func (s *ShorterServer) Create(ctx context.Context, req *pb.UrlRequest) (*pb.Lin
 
 func (s *ShorterServer) Get(ctx context.Context, req *pb.LinkRequest) (*pb.UrlResponse, error) {
 	response := new(pb.UrlResponse)
-
-	if strings.Contains(req.Link, "localshorter.local/") {
-		req.Link = strings.Replace(req.Link, "localshorter.local/", "", 1)
+	if req.Link == "" {
+		return nil, status.Error(codes.InvalidArgument, "link cannot be empty")
 	}
+	req.Link = strings.Replace(req.Link, "localshorter.local/", "", 1)
 	db = GetDB()
 	db.QueryRow("SELECT url FROM links WHERE link = $1;", req.Link).Scan(&response.Url)
 	if response.Url != "" {
 		return response, nil
 	} else {
-		response.Url = "Wrong link!"
+		response.Url = "empty"
 		return response, nil
 	}
 }
 
 func genShortLink() string {
-	unique := false
 	link := make([]byte, 10)
-	for !unique {
-		for i := range link {
-			link[i] = chars[seededRand.Intn(len(chars))]
-		}
-		unique = isUnique(string(link))
+	for i := range link {
+		link[i] = chars[seededRand.Intn(len(chars))]
 	}
 	return string(link)
 }
 
-func isUnique(link string) bool {
-
-	db = GetDB()
-	var check string
-	db.QueryRow("SELECT EXISTS (SELECT link FROM links WHERE link = $1 LIMIT 1);", link).Scan(&check)
-	if check != "false" {
-		return false
-	}
-	return true
-}
+// func isUnique(link string) bool {
+//
+// 	db = GetDB()
+// 	var check string
+// 	db.QueryRow("SELECT EXISTS (SELECT link FROM links WHERE link = $1 LIMIT 1);", link).Scan(&check)
+// 	return check=="false"
+// }
