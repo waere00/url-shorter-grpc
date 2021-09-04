@@ -11,8 +11,8 @@ import (
 
 var (
 	targetAddr string
-	host       string = "localhost"
-	port       string = "9080"
+	HOST       string = "localhost"
+	PORT       string = "9080"
 )
 
 func choice(cli pb.ShorterClient) {
@@ -70,12 +70,12 @@ func choice(cli pb.ShorterClient) {
 
 func init() {
 	if os.Getenv("PORT") != "" {
-		port = os.Getenv("port")
+		PORT = os.Getenv("PORT")
 	}
 	if os.Getenv("HOST") != "" {
-		host = os.Getenv("host")
+		HOST = os.Getenv("HOST")
 	}
-	targetAddr = host + ":" + port
+	targetAddr = HOST + ":" + PORT
 }
 
 func main() {
