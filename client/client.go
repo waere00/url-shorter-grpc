@@ -1,72 +1,21 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	pb "github.com/waere00/url-shorter-grpc/proto"
-	"google.golang.org/grpc"
 	"log"
+	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	pb "github.com/waere00/url-shorter-grpc/proto/v2"
+	"google.golang.org/grpc"
 )
 
 var (
 	targetAddr string
-	HOST       string = "localhost"
+	HOST       string = "serv_container"
 	PORT       string = "9080"
+	routerPORT string = "1080"
 )
-
-func choice(cli pb.ShorterClient) {
-
-	const (
-		Create = "1"
-		Get    = "2"
-		Exit   = "3"
-	)
-	var start string
-
-	fmt.Println("\nВыберите действие:\n" +
-		"1. Генерировать сокращенную ссылку\n" +
-		"2. Использовать короткую ссылку для получения первичной ссылки\n" +
-		"3. Выйти")
-	fmt.Scan(&start)
-
-	var link string
-	switch start {
-
-	case Create:
-		fmt.Println("Вставьте ссылку:")
-		fmt.Scan(&link)
-		result, err := cli.Create(context.Background(), &pb.UrlRequest{Url: link})
-		if err != nil {
-			log.Fatalln("Ошибка grpcserver, метод Create: ", err)
-		}
-		fmt.Printf("Короткая ссылка: %s\n", result.Link)
-		choice(cli)
-
-	case Get:
-		fmt.Println("Вставьте короткую ссылку:")
-		fmt.Scan(&link)
-		result, err := cli.Get(context.Background(), &pb.LinkRequest{Link: link})
-		if err != nil {
-			log.Fatalln("Ошибка grpcserver, метод Get: ", err)
-		}
-		if result.Url != "empty" {
-			fmt.Printf("Оригинальная ссылка: %s\n", result.Url)
-		} else {
-			fmt.Println("Оригинальная ссылка не нашлась")
-		}
-		choice(cli)
-
-	case Exit:
-		fmt.Println("Завершение работы клиента")
-		os.Exit(0)
-
-	default:
-		fmt.Println(link, "Такой команды нет")
-		choice(cli)
-	}
-
-}
 
 func init() {
 	if os.Getenv("PORT") != "" {
@@ -75,19 +24,56 @@ func init() {
 	if os.Getenv("HOST") != "" {
 		HOST = os.Getenv("HOST")
 	}
+	if os.Getenv("routerPORT") != "" {
+		routerPORT = os.Getenv("routerPORT")
+	}
+
 	targetAddr = HOST + ":" + PORT
 }
 
 func main() {
-	fmt.Println("Инициализация клиента")
 	conn, err := grpc.Dial(targetAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalln("Ошибка при соединении с grpc сервером: ", err)
-	} else {
-		log.Println("fine!")
+		log.Fatalf("Unable to connect: %s", err)
 	}
+	client := pb.NewShorterClient(conn)
+	router := gin.Default()
 
-	cli := pb.NewShorterClient(conn)
+	router.Static("/css", "html/css")
+	router.LoadHTMLGlob("html/*.html")
 
-	choice(cli)
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "TestShorter",
+		})
+	})
+
+	router.POST("/", func(ctx *gin.Context) {
+		req := &pb.Url{Url: ctx.PostForm("url")}
+		if response, err := client.Create(ctx, req); err == nil {
+			ctx.HTML(http.StatusOK, "create.html", gin.H{
+				"title": "TestShorter",
+				"url":   req.Url,
+				"link":  response.Link,
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+	})
+
+	router.GET("/get", func(ctx *gin.Context) {
+		req := &pb.Link{Link: ctx.Query("link")}
+		if response, err := client.Get(ctx, req); err == nil {
+			ctx.HTML(http.StatusOK, "get.html", gin.H{
+				"title": "TestShorter",
+				"url":   response.Url,
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+	})
+
+	if err := router.Run(":" + routerPORT); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
 }

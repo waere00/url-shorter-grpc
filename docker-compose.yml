@@ -11,21 +11,25 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: links_db
     volumes:
-      #      - ./server/db_data:/var/lib/postgresql/data
+      # - ./server/db_data:/var/lib/postgresql/data
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   serv:
-    container_name: serv_container
-    depends_on:
-      - database
+    container_name: serv_cont
     build:
       context: ./server
       dockerfile: Dockerfile
     ports:
       - "9080:9080"
-    # environment:
-    #      dbHost: db_container
-    #     host: server_container
     depends_on:
       - dbase
 
+  client:
+    container_name: webcl_cont
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "1080:1080"
+    depends_on:
+      - serv

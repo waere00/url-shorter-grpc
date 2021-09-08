@@ -1,31 +1,19 @@
-// .................................
-// To generate .go file from .proto
-// .................................
-// (from src folder) >>> protoc -I proto proto/short.proto --go_out=plugins=grpc:proto/
-// (from src folder) >>> mv proto/proto/short.pb.go proto/ ; rm -rf proto/proto
-
+// protoc -I proto proto/shorter.proto --go_out=plugins=grpc:proto
 syntax = "proto3";
 
 package shorter;
 
+option go_package = "./";
 
 service Shorter {
-    rpc Create(UrlRequest) returns (LinkResponse) {}
-    rpc Get(LinkRequest) returns (UrlResponse) {}
+    rpc Create(Url) returns (Link) {}
+    rpc Get(Link) returns (Url) {}
 }
 
-// ...   CREATE   ...
-message UrlRequest {
-    string url = 1;
-}
-message LinkResponse {
-    string link = 1;
-}
 
-// ...   GET   ...
-message LinkRequest {
-    string link = 1;
-}
-message UrlResponse {
+message Url {
     string url = 1;
+}
+message Link {
+    string link = 1;
 }

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	pb "github.com/waere00/url-shorter-grpc/proto"
+	pb "github.com/waere00/url-shorter-grpc/proto/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -37,26 +37,26 @@ var seededRand *rand.Rand = rand.New(
 var db *sql.DB
 
 func init() {
-	if os.Getenv("PORT") != "" {
-		port = os.Getenv("PORT")
+	if os.Getenv("port") != "" {
+		port = os.Getenv("port")
 	}
-	if os.Getenv("HOST") != "" {
-		host = os.Getenv("HOST")
+	if os.Getenv("host") != "" {
+		host = os.Getenv("host")
 	}
-	if os.Getenv("DB_HOST") != "" {
-		dbHost = os.Getenv("DB_HOST")
+	if os.Getenv("dbHost") != "" {
+		dbHost = os.Getenv("dbHost")
 	}
-	if os.Getenv("DB_PORT") != "" {
-		dbPort = os.Getenv("DB_PORT")
+	if os.Getenv("dbPort") != "" {
+		dbPort = os.Getenv("dbPort")
 	}
-	if os.Getenv("DB_NAME") != "" {
-		dbName = os.Getenv("DB_NAME")
+	if os.Getenv("dbName") != "" {
+		dbName = os.Getenv("dbName")
 	}
-	if os.Getenv("DB_USER") != "" {
-		dbUser = os.Getenv("DB_USER")
+	if os.Getenv("dbUser") != "" {
+		dbUser = os.Getenv("dbUser")
 	}
-	if os.Getenv("DB_PASSWORD") != "" {
-		dbPassword = os.Getenv("DB_PASSWORD")
+	if os.Getenv("dbPassword") != "" {
+		dbPassword = os.Getenv("dbPassword")
 	}
 	selfAddr = host + ":" + port
 }
@@ -104,11 +104,11 @@ func GetDB() *sql.DB {
 type ShorterServer struct {
 }
 
-func (s *ShorterServer) Create(ctx context.Context, req *pb.UrlRequest) (*pb.LinkResponse, error) {
+func (s *ShorterServer) Create(ctx context.Context, req *pb.Url) (*pb.Link, error) {
 	if req.Url == "" {
 		return nil, status.Error(codes.InvalidArgument, "url cannot be empty")
 	}
-	response := new(pb.LinkResponse)
+	response := new(pb.Link)
 	db = GetDB()
 	var checkLink string
 	db.QueryRow("SELECT link FROM links WHERE url = $1;", req.Url).Scan(&checkLink)
@@ -127,8 +127,8 @@ func (s *ShorterServer) Create(ctx context.Context, req *pb.UrlRequest) (*pb.Lin
 	return response, nil
 }
 
-func (s *ShorterServer) Get(ctx context.Context, req *pb.LinkRequest) (*pb.UrlResponse, error) {
-	response := new(pb.UrlResponse)
+func (s *ShorterServer) Get(ctx context.Context, req *pb.Link) (*pb.Url, error) {
+	response := new(pb.Url)
 	if req.Link == "" {
 		return nil, status.Error(codes.InvalidArgument, "link cannot be empty")
 	}
