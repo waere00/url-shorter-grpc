@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	pb "github.com/waere00/url-shorter-grpc/v2/proto"
@@ -50,6 +52,14 @@ func main() {
 
 	router.POST("/", func(ctx *gin.Context) {
 		req := &pb.Url{Url: ctx.PostForm("url")}
+		if !strings.HasPrefix(req.Url, "http://") && !strings.HasPrefix(req.Url, "https://") {
+			req.Url = "http://" + req.Url
+		}
+		if !isValidUrl(req.Url) {
+			// err := errors.New("bad URL")
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "bad URL"})
+			return
+		}
 		if response, err := client.Create(ctx, req); err == nil {
 			ctx.HTML(http.StatusOK, "create.html", gin.H{
 				"title": "TestShorter",
@@ -76,4 +86,14 @@ func main() {
 	if err := router.Run("0.0.0.0:" + routerPORT); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
+}
+
+// Check if given string is valid URL
+func isValidUrl(urlToCheck string) bool {
+	_, err := url.ParseRequestURI(urlToCheck)
+	if err != nil {
+		log.Printf("Bad URL: %s", urlToCheck)
+		return false
+	}
+	return true
 }
