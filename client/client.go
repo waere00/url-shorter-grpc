@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	pb "github.com/waere00/url-shorter-grpc/proto/v2"
+	pb "github.com/waere00/url-shorter-grpc/v2/proto"
 	"google.golang.org/grpc"
 )
 

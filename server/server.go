@@ -12,7 +12,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	pb "github.com/waere00/url-shorter-grpc/proto/v2"
+	pb "github.com/waere00/url-shorter-grpc/v2/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
