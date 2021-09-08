@@ -12,7 +12,7 @@ import (
 
 var (
 	targetAddr string
-	HOST       string = "serv_container"
+	HOST       string = "serv_cont"
 	PORT       string = "9080"
 	routerPORT string = "1080"
 )
