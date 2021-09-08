@@ -1,0 +1,49 @@
+h1 {
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 150px;
+    font-weight: bold;
+    text-align: center;
+}
+
+h3 {
+    font-family: 'Titillium Web', sans-serif;
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+}
+
+body{
+    background-color: #D8D8D8;
+}
+
+
+label {
+    font-family: 'Titillium Web';
+    font-size: 40px;
+    font-weight: bold;
+    margin-left: 30%;
+    margin-right: 70%;
+}
+
+button {
+    background-color: black;
+    color: white;
+    padding: 5px 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 45%;
+    margin-right: 45%;
+    width: 10%;
+    font-size: 16px;
+
+}
+
+input {
+    padding: 6px 20px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-left: 30%;
+    margin-right: 30%;
+    width: 40%;
+    font-size: 22px;
+}

@@ -20,10 +20,10 @@ import (
 
 var (
 	selfAddr   string
-	host       string = "localhost"
+	host       string = "0.0.0.0"
 	port       string = "9080"
-	dbHost     string = "localhost"
-	dbPort     string = "5434"
+	dbHost     string = "db_postgres"
+	dbPort     string = "5432"
 	dbName     string = "links_db"
 	dbUser     string = "postgres"
 	dbPassword string = "postgres"
@@ -132,13 +132,14 @@ func (s *ShorterServer) Get(ctx context.Context, req *pb.Link) (*pb.Url, error) 
 	if req.Link == "" {
 		return nil, status.Error(codes.InvalidArgument, "link cannot be empty")
 	}
+	req.Link = strings.TrimSpace(req.Link)
 	req.Link = strings.Replace(req.Link, "localshorter.local/", "", 1)
 	db = GetDB()
 	db.QueryRow("SELECT url FROM links WHERE link = $1;", req.Link).Scan(&response.Url)
 	if response.Url != "" {
 		return response, nil
 	} else {
-		response.Url = "empty"
+		response.Url = "No such link in the database"
 		return response, nil
 	}
 }

@@ -5,7 +5,7 @@ services:
     image: postgres:latest
     restart: always
     ports:
-      - "5434:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -29,7 +29,7 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-    ports:
-      - "1080:1080"
     depends_on:
       - serv
+    ports:
+     - "1080:1080"
