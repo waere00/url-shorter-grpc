@@ -73,6 +73,9 @@ func main() {
 
 	router.GET("/get", func(ctx *gin.Context) {
 		req := &pb.Link{Link: ctx.Query("link")}
+		if !strings.HasPrefix(req.Link, "http://") && !strings.HasPrefix(req.Link, "https://") {
+			req.Link = "http://" + req.Link
+		}
 		if response, err := client.Get(ctx, req); err == nil {
 			ctx.HTML(http.StatusOK, "get.html", gin.H{
 				"title": "TestShorter",
