@@ -14,23 +14,23 @@ import (
 
 var (
 	targetAddr string
-	HOST       string = "serv_cont"
-	PORT       string = "9080"
+	host       string = "serv_cont"
+	port       string = "9080"
 	routerPORT string = "1080"
 )
 
 func init() {
-	if os.Getenv("PORT") != "" {
-		PORT = os.Getenv("PORT")
+	if os.Getenv("port") != "" {
+		port = os.Getenv("port")
 	}
-	if os.Getenv("HOST") != "" {
-		HOST = os.Getenv("HOST")
+	if os.Getenv("host") != "" {
+		host = os.Getenv("host")
 	}
 	if os.Getenv("routerPORT") != "" {
 		routerPORT = os.Getenv("routerPORT")
 	}
 
-	targetAddr = HOST + ":" + PORT
+	targetAddr = host + ":" + port
 }
 
 func main() {
